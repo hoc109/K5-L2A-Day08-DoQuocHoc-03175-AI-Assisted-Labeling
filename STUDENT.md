@@ -5,7 +5,7 @@
 - Lớp (L2 / L3 / khác): L2A
 - Tài khoản GitHub: hoc109
 - Repo bài nộp (URL): https://github.com/hoc109/K5-L2A-Day08-DoQuocHoc-03175-AI-Assisted-Labeling
-- Commit chốt bài (hash): cập nhật sau commit cuối (xem `git rev-parse --short HEAD`)
+- Commit chốt bài (hash): `0f731f0` (bản chốt nội dung báo cáo & dữ liệu: `0f731f0685dda563bd972f0f9f6e1e4a142195ab`)
 - Máy: Windows (Python 3.12.16 venv, GPU NVIDIA GeForce RTX 4050 Laptop GPU 6GB CUDA)
 - CVAT (Docker): CVAT 2.74.1 bản chuẩn Docker chạy local tại http://localhost:8080 (không cài Nuclio/SAM serverless; đã tạo Project `day08-2A202603175` `id=3` gồm 3 Task: `gold-manual` #10 [4 ảnh, 68 shapes], `batch-review` #11 [24 ảnh, 532 shapes], `batch-prelabel` #12 [24 ảnh, 570 shapes])
 
