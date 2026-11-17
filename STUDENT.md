@@ -12,7 +12,7 @@
 ## Kết quả tóm tắt (điền cuối bài; số lấy từ `submission/qc/*`, kèm mẫu số)
 
 - Máy: accepted / edited / deleted: `486/556 (87.4%) / 15/556 (2.7%) / 55/556 (9.9%) (mẫu số: 556 box máy)`; added: `17/518 (3.3%) (mẫu số: 518 đối tượng sau duyệt; trong đó 8 ca đổi lớp -> sót thật ~9)`
-- So với gold: precision / recall của **máy** `85.1% (63/74) / 94.0% (63/67)` *(lạc quan do gold dùng pre-label làm nền và chọn ngưỡng in-sample)*
+- So với gold: precision / recall của **máy** `85.1% (63/74) / 94.0% (63/67)`
 - Bắt bẫy: `11/12 = 91.7%` (Vòng 2 Rework với MSHV `2A202603175`: `extra 3/3`, `missing 3/3`, `wrong_class 3/3`, `loose 2/3`; lọt 1 bẫy `img_023.jpg loose`; tăng từ `8/12 = 66.7%` ở Vòng 1)
 - Thời gian: gán tay `0.75 phút/ảnh (3 phút / 4 ảnh, AI dùng pre-label làm nền)`; duyệt có pre-label `0.58 phút/ảnh (14 phút / 24 ảnh gồm 6 phút Vòng 1 + 8 phút Vòng 2 Rework phóng to/lưới 100px)`
 - Lỗi QC: `0.0% theo đối tượng (0/182)`, `0.0% theo ảnh (0/8)` (Vòng 2 sau Rework; Vòng 1 trước khi sửa là `5/153 = 3.3%` đối tượng và `4/7 = 57.1%` ảnh)

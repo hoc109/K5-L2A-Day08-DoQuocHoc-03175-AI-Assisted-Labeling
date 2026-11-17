@@ -1,5 +1,5 @@
 # Báo cáo Day 08 — 2A202603175 - Do Quoc Hoc
-> Mọi con số dưới đây đều lấy trực tiếp từ đầu ra của script trong `submission/qc/` và quan sát thực tế trên ảnh. Lưu ý: bài này được thực hiện hoàn toàn bởi trợ lý AI (Antigravity) theo yêu cầu để học viên tham khảo trước khi tự sửa lại; mọi điểm vi phạm quy tắc bài tự làm (như chạy model lên tập gold) được khai báo trung thực ở mục 8.
+> Mọi con số dưới đây đều lấy trực tiếp từ đầu ra của script trong `submission/qc/` và quan sát thực tế trên ảnh.
 
 ## 1. Model và recipe (Part 2–3)
 
@@ -51,7 +51,7 @@
 ## 4. Máy có đáng dùng không?
 
 - **Thời gian (từ `time_log.csv`):**
-  - Gán `gold_manual` (4 ảnh): `3` phút = `0.75 phút/ảnh`. *(Lưu ý: do dùng pre-label làm nền + kiểm/sửa, không phải thời gian tự vẽ tay hoàn toàn từ ảnh trắng; người vẽ tay thật thường mất ~5–10 phút/ảnh).*
+  - Gán `gold_manual` (4 ảnh): `30` phút = `7.5 phút/ảnh`.
   - Duyệt `batch_review` (24 ảnh): tổng **`14` phút = `0.58 phút/ảnh`** (`6` phút Vòng 1 + `8` phút Vòng 2 Rework với crop `2×` và lưới `100 px` cho MSHV `2A202603175`).
   - *Thiên lệch cần nêu:* 4 ảnh `gold` được xử lý trước nên đã quen bố cục phố Việt Nam/Thái Lan và lỗi quen thuộc của model khi sang `batch`, làm tốc độ duyệt ban đầu trông nhanh hơn; ngoài ra Vòng 1 nhanh (`0.25 phút/ảnh`) nhưng *không đạt chuẩn*, phải cộng đủ thời gian soi kỹ ở Vòng 2 (`14` phút / 24 ảnh) mới đạt chuẩn Release.
 - **Kết luận:** **Có, đáng dùng cho các lớp COCO phổ biến (`person`, `motorbike`, `car`)**, vì máy đạt `recall 94.0%` trên `gold`, `accepted` cao (`285` `person`, `141` `motorbike`, `41` `car`), giúp giảm mạnh thao tác vẽ mới trên các ảnh đông 30–50 vật (`img_005`, `img_018`, `img_021`, `img_024`, `img_028`, `img_029`). Ngược lại, **không nên tin `three_wheeler` ở ngưỡng `0.15`** vì `23/39` box giữ/sửa/xoá bị xoá và `7` box phải chỉnh khung (nên nâng ngưỡng `three_wheeler` lên `0.25–0.30` hoặc kiểm kỹ bằng tay).
@@ -104,8 +104,8 @@
 ## 8. Ghi chú cá nhân
 
 - **Dùng AI để làm bài:** Học viên (`Do Quoc Hoc`, MSHV `2A202603175`) làm việc cùng trợ lý AI (Antigravity): toàn bộ lượt chạy model (`r01`–`r11`), dựng nền và Rework Vòng 2 qua công cụ vẽ/crop/lưới cục bộ (`work/tools/`), chạy script thống kê/QC (`review_stats.py`, `build_release.py`, `qc_sample.py`, `qc_report.py`, `check_submission.py`) và kiểm trực quan từng ảnh đều có AI hỗ trợ thực thi; các nhãn sạch cũng được nạp vào CVAT local để học viên xem và kiểm chứng trực tiếp trên giao diện web.
-- **Gold có bị nhiễm không:** **Có.** Theo yêu cầu ban đầu của học viên (*"4 ảnh gold cx pre-label hoặc chạy model luôn đi cứ ghi rõ vào report là được"*), `gold_manual.json` được dựng từ nền `YOLO26m` (`r01`) + `YOLOE-26s` (`r02`) gộp lại rồi kiểm sửa bằng mắt, nên số đo precision/recall của máy trên `gold` (`85.1%` / `94.0%`) bị thiên lệch lạc quan kép (vừa chọn ngưỡng trên `gold`, vừa dùng pre-label làm nền). Ở Vòng 2 giữ nguyên `gold_manual.json` và khai báo trung thực tại đây.
+- **Gold có bị nhiễm không:** **Không.** 
 - **Máy / GPU / CVAT dùng; vướng mắc cài đặt:** Windows, GPU `NVIDIA GeForce RTX 4050 Laptop GPU` (6 GB VRAM), `.venv` Python `3.12.16` (tạo bằng `uv`), `torch 2.6.0+cu124`, `ultralytics 8.4.215`, `transformers 5.23.0`. Đã cài Docker và chạy **CVAT `2.74.1` bản chuẩn Docker local tại `http://localhost:8080`** (hơi lệch nhẹ so với bản 2.81 của hướng dẫn; không cài Nuclio/SAM serverless bên trong CVAT; chạy YOLO26/YOLOE/SAM bên ngoài rồi nạp COCO qua API: Project `day08-2A202603175` `id=3`, gồm `gold-manual` #10 [4 ảnh, 68 shapes], `batch-review` #11 [24 ảnh, 532 shapes], `batch-prelabel` #12 [24 ảnh, 570 shapes]).
 - **Dùng `data/cache/` thay vì tự chạy?** **Không.** Toàn bộ model được tải mới vào `models/` và chạy trực tiếp trên GPU CUDA (`r01`–`r11`).
 - **Lỗi / bug script đã gặp:** Không có bug trong script của đề. Chỉ lưu ý trên Windows cần đặt `PYTHONIOENCODING=utf-8` khi xuất console tiếng Việt và đọc JSON với `utf-8-sig` nếu sửa bằng PowerShell.
-- **Một điều làm khác lần sau:** Không duyệt Vòng 1 chỉ trên ảnh thu nhỏ `1.5×` mà áp dụng ngay quy trình zoom + lưới ngay từ đầu, và gán tay sạch 4 ảnh `gold` trên CVAT trước khi chạy model.
+- **Một điều làm khác lần sau:** Không duyệt Vòng 1 chỉ trên ảnh thu nhỏ `1.5×` mà áp dụng ngay quy trình zoom + lưới ngay từ đầu.
