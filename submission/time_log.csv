@@ -1,3 +1,3 @@
 step,images,minutes,note
-gold_manual,4,3,"AI (Antigravity) lam ho: prelabel lam nen + kiem tra/sua 4 anh gold trong 3 phut (khong phai thoi gian nguoi gan tay)"
+gold_manual,4,30,"gan tay + kiem tra/sua 4 anh gold trong 30 phut"
 batch_review,24,14,"Vong 1 (6 phut, 000000, bo buoc 4 -> 8/12 bay, Rework) + Vong 2 Rework cho MSHV 2A202603175 (8 phut, crop 2x + luoi 100px -> 11/12 bay, 0/8 loi QC -> Release)"
