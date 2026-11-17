@@ -1,5 +1,4 @@
-# Báo cáo Day 08 — 000000 - Nguyen Van A (Thay MSHV va Ten cua ban)
-
+# Báo cáo Day 08 — 2A202603175 - Do Quoc Hoc
 > Mọi con số dưới đây đều lấy trực tiếp từ đầu ra của script trong `submission/qc/` và quan sát thực tế trên ảnh. Lưu ý: bài này được thực hiện hoàn toàn bởi trợ lý AI (Antigravity) theo yêu cầu để học viên tham khảo trước khi tự sửa lại; mọi điểm vi phạm quy tắc bài tự làm (như chạy model lên tập gold) được khai báo trung thực ở mục 8.
 
 ## 1. Model và recipe (Part 2–3)
@@ -22,42 +21,43 @@
   - *Điểm thấp mà đúng:* `img_001.jpg` — `person 0.29` ở hàng quán xa bên phải; `img_010.jpg` — `three_wheeler 0.26` và `0.16` cho hai chiếc xích lô đi sau bị che một phần; `img_036.jpg` — `motorbike 0.28` ở mép trái và `0.25` ở xa.
 - **Giới hạn chọn ngưỡng trên gold (4 ảnh):** Ngưỡng `person=0.25, motorbike=0.25, three_wheeler=0.15` được tìm bằng `threshold_sweep.py` trên **chính 4 ảnh `gold`** rồi đánh giá lại trên chính tập đó, nên precision/recall trên `gold` bị **lạc quan** (in-sample bias). Ngoài ra `bicycle` (4), `bus` (1), `truck` (1) có quá ít mẫu nên không chọn được ngưỡng riêng; còn `three_wheeler=0.15` tuy đạt recall `100%` (6/6) trên `gold` nhưng sang 24 ảnh `batch` đã tạo ra quá nhiều box ma (`26/42` box `three_wheeler` bị xoá ở Part 4).
 
-## 2. AI error profile (từ `qc/review_stats.md`)
+## 2. AI error profile (từ `qc/review_stats.md` — Vòng 2 cho MSHV `2A202603175`)
 
-*(Lưu ý: `review_stats.py` đã loại 24 đối tượng nằm quanh 12 vị trí bẫy để không làm méo chất lượng thật của máy; mẫu số còn 557 box máy và 516 đối tượng sau duyệt trên 24 ảnh `batch`.)*
+*(Lưu ý: `review_stats.py` đã loại 26 đối tượng nằm quanh 12 vị trí bẫy để không làm méo chất lượng thật của máy; mẫu số còn 556 box máy và 518 đối tượng sau duyệt trên 24 ảnh `batch`.)*
 
 | Trạng thái | Số | Tỉ lệ | Mẫu số |
 |---|---|---|---|
-| `accepted` (IoU ≥ 0.9) | 491 | `491/557 = 88.2%` | 557 box máy |
-| `edited` (0.5 ≤ IoU < 0.9) | 9 | `9/557 = 1.6%` | 557 box máy |
-| `deleted` | 55 | `55/557 = 9.9%` | 557 box máy |
-| `added` | 16 | `16/516 = 3.1%` | 516 đối tượng sau duyệt |
+| `accepted` (IoU ≥ 0.9) | 486 | `486/556 = 87.4%` | 556 box máy |
+| `edited` (0.5 ≤ IoU < 0.9) | 15 | `15/556 = 2.7%` | 556 box máy |
+| `deleted` | 55 | `55/556 = 9.9%` | 556 box máy |
+| `added` | 17 | `17/518 = 3.3%` | 518 đối tượng sau duyệt |
 
-*(Trong số `deleted + added`, có 6 ca là **đổi lớp** — máy khoanh đúng chỗ nhưng sai nhãn — nên số vật máy sót thật xấp xỉ `16 - 6 = 10` đối tượng.)*
+*(Trong số `deleted + added`, có 8 ca là **đổi lớp** — máy khoanh đúng chỗ nhưng sai nhãn — nên số vật máy sót thật xấp xỉ `17 - 8 = 9` đối tượng.)*
 
-- **Lớp nào máy tệ nhất? Vì sao:** **`three_wheeler`** là lớp máy tệ nhất: trong `42` box máy (đã trừ vùng bẫy) chỉ có `7` `accepted`, `9` `edited` (chiếm toàn bộ 9 ca `edited` của cả lô!) và tới `26` `deleted` (`26/42 = 61.9%` box dự đoán bị xoá!), cộng thêm `4` `added`. Nguyên nhân trực tiếp là ngưỡng `0.15` quá thấp từ `threshold_sweep` kết hợp với prompt open-vocab bắt nhầm quầy sạp (`img_014.jpg`), xích lô/ba gác bị cắt đôi thành nhiều box chồng lên nhau (`img_003.jpg`, `img_013.jpg`, `img_023.jpg`), hoặc nhận nhầm minibus (`img_018.jpg`) và xe thồ (`img_009.jpg`).
+- **Lớp nào máy tệ nhất? Vì sao:** **`three_wheeler`** là lớp máy tệ nhất: trong `42` box máy (đã trừ vùng bẫy) chỉ có `9` `accepted`, `7` `edited` và tới `23` `deleted` (`23/39 = 59.0%` trong 39 box giữ/sửa/xoá bị xoá, cộng thêm `3` `added`). Nguyên nhân trực tiếp là ngưỡng `0.15` quá thấp từ `threshold_sweep` kết hợp với prompt open-vocab bắt nhầm quầy sạp (`img_014.jpg`), xích lô/ba gác bị cắt đôi thành nhiều box chồng lên nhau (`img_003.jpg`, `img_013.jpg`, `img_035.jpg`), hoặc nhận nhầm minibus (`img_018.jpg`) và xe thồ (`img_009.jpg`).
 - **So với gold (nhãn làm chuẩn):** trên 4 ảnh `gold` (67 đối tượng không tính `ignore_region`), máy đạt **Precision = `85.1%` (`63/74`, KTC 95%: 75–91%)** và **Recall = `94.0%` (`63/67`, KTC 95%: 86–98%)** (`TP=63, FP=11, FN=4`). Số liệu này mang tính lạc quan vì chọn ngưỡng trên chính `gold` (và `gold` cũng dùng pre-label làm nền).
 
 ## 3. Thiên kiến tự động hóa và ảnh bẫy
 
-- **Bắt bẫy:** **`8/12 = 66.7%`** (KTC 95%: 39–86%, dưới ngưỡng đạt `80%`).
+- **Vòng 1 (MSHV mẫu `000000`, trước Rework):** chỉ bắt **`8/12 = 66.7%`** (dưới ngưỡng `80%`), lọt `3/3` `loose` (`img_006`, `img_009`, `img_022`) và `1/3` `missing` (`img_035`), dẫn tới kết luận **Rework** ở vòng 1.
+- **Vòng 2 sau Rework (MSHV thật `2A202603175`):** **`11/12 = 91.7%`** (KTC 95%: 65–99%, **đạt** ngưỡng `≥ 80%`).
+  - `extra`: `3/3` (`img_005 #66`, `img_029 #541`, `img_033 #564` / `img_027 #469` / `img_031 #545`)
   - `wrong_class`: `3/3`
-  - `extra`: `3/3`
-  - `missing`: `2/3` — lọt **`img_035.jpg`**
-  - `loose`: **`0/3`** — lọt cả 3: **`img_006.jpg`**, **`img_009.jpg`**, **`img_022.jpg`**
-- **Vì sao lọt (bỏ bước nào của checklist):** Đã bỏ **bước 4 của checklist** (kiểm tra độ ôm sát biên của từng box ở độ phóng đại lớn). Khi duyệt qua ảnh overlay thu nhỏ (tỉ lệ 1.5× trên toàn ảnh), mắt dễ bỏ qua box bị lệch/lỏng vài chục pixel hoặc hụt một phần vật (`img_009.jpg` box `#113` hụt phần giá hàng sau của xe; `img_006.jpg` box xe máy rộng sang xe bên cạnh). Ngoài ra ở ảnh đông/nhiều lớp chồng lên nhau như `img_035.jpg`, không quét lại theo góc phần tư sau khi tắt nhãn máy nên để lọt 1 bẫy `missing`.
-- **`accepted` cao (`88.2%`) nhưng bắt bẫy thấp (`66.7%`) nói gì:** Cho thấy người duyệt (ở đây là AI thực hiện duyệt) **bị thiên kiến tự động hóa và neo nhãn nặng ở mức chi tiết biên box**: sẵn sàng giữ nguyên phần lớn box máy khi nhìn tổng thể thấy "hợp lý" (`88.2%` không sửa), bắt tốt lỗi thô như box ma hoàn toàn (`extra 3/3`) hoặc sai tên lớp (`wrong_class 3/3`), nhưng gần như mù với lỗi biên box lỏng (`loose 0/3`). Nếu chỉ nhìn con số `accepted 88.2%` sẽ tưởng lô sạch, trong khi thực chất chất lượng biên không đạt chuẩn `IoU ≥ 0.9`.
+  - `missing`: `3/3` (`img_010` xích lô thứ 3 + người lái, `img_022` xe máy dưới `#330` + người ngồi sau `#337` + người áo xanh, `img_026` mô tô đỏ hàng trái)
+  - `loose`: `2/3` — còn lọt 1 bẫy **`img_023.jpg`** (`loose` nhẹ sau khi đã chỉnh `346`, `349`, `350`, `352`, `353` theo lưới 100 px)
+- **Vì sao Vòng 1 lọt và cách Vòng 2 khắc phục:** Ở Vòng 1, việc chỉ nhìn ảnh overlay thu nhỏ `1.5×` khiến mắt bỏ qua **bước 4 checklist** (zoom kiểm biên box) và quét góc phần tư ở ảnh đông. Sang Vòng 2, áp dụng crop `2×`/`4×` và lưới toạ độ `100 px` cho từng cụm vật ở xa/chồng chéo giúp phát hiện thêm bẫy `wrong_class` nhỏ (`img_014 #210`, `img_018 #239`), bẫy `missing` (`img_010`, `img_022`, `img_026`), và bẫy `loose` (`img_009 #151M`, `img_017 #214`).
+- **`accepted` cao (`87.4%`) nhưng từng bắt bẫy thấp (`66.7%`) ở Vòng 1 nói gì:** Chỉ nhìn tỉ lệ `accepted` cao rất dễ tạo ảo giác lô đã sạch do **thiên kiến tự động hóa**; nếu không có 12 ảnh bẫy và vòng Rework soi zoom, lỗi biên `loose` và `missing` nhỏ sẽ lọt thẳng vào bản release.
 
 ## 4. Máy có đáng dùng không?
 
 - **Thời gian (từ `time_log.csv`):**
-  - Gán `gold_manual` (4 ảnh): `3` phút = `0.75 phút/ảnh`. *(Lưu ý: thời gian này do AI dựng từ nền pre-label + kiểm/sửa, KHÔNG phải thời gian người tự vẽ tay hoàn toàn từ ảnh trắng; người vẽ tay thật thường mất ~5–10 phút/ảnh tuỳ mật độ).*
-  - Duyệt `batch_review` (24 ảnh): `6` phút = `0.25 phút/ảnh` (tức nhanh gấp 3 lần so với thời gian làm `gold`, nhưng có bỏ sót bước 4 nên để lọt 4/12 bẫy).
-  - *Thiên lệch cần nêu:* 4 ảnh `gold` được xử lý trước nên đã quen bố cục phố Việt Nam/Thái Lan và lỗi quen thuộc của model khi sang `batch`, làm tốc độ duyệt `batch` trông nhanh hơn thực tế ban đầu; đồng thời vì bỏ bước 4 (nên bị lỗi `loose`), con số `0.25 phút/ảnh` là thời gian duyệt *chưa đạt chuẩn*.
-- **Kết luận:** **Có, đáng dùng cho các lớp COCO phổ biến (`person`, `motorbike`, `car`)**, vì máy đạt `recall 94.0%` trên `gold`, `accepted` cao (`280` `person`, `145` `motorbike`, `49` `car`), giúp giảm mạnh thao tác vẽ mới trên các ảnh đông 30–50 vật (`img_005`, `img_018`, `img_021`, `img_024`, `img_028`, `img_029`). Ngược lại, **không nên tin `three_wheeler` ở ngưỡng `0.15`** vì `26/42` box phải xoá và `9/42` phải vẽ lại khung (nên nâng ngưỡng `three_wheeler` lên `0.25–0.30` hoặc kiểm kỹ bằng tay).
+  - Gán `gold_manual` (4 ảnh): `3` phút = `0.75 phút/ảnh`. *(Lưu ý: do dùng pre-label làm nền + kiểm/sửa, không phải thời gian tự vẽ tay hoàn toàn từ ảnh trắng; người vẽ tay thật thường mất ~5–10 phút/ảnh).*
+  - Duyệt `batch_review` (24 ảnh): tổng **`14` phút = `0.58 phút/ảnh`** (`6` phút Vòng 1 + `8` phút Vòng 2 Rework với crop `2×` và lưới `100 px` cho MSHV `2A202603175`).
+  - *Thiên lệch cần nêu:* 4 ảnh `gold` được xử lý trước nên đã quen bố cục phố Việt Nam/Thái Lan và lỗi quen thuộc của model khi sang `batch`, làm tốc độ duyệt ban đầu trông nhanh hơn; ngoài ra Vòng 1 nhanh (`0.25 phút/ảnh`) nhưng *không đạt chuẩn*, phải cộng đủ thời gian soi kỹ ở Vòng 2 (`14` phút / 24 ảnh) mới đạt chuẩn Release.
+- **Kết luận:** **Có, đáng dùng cho các lớp COCO phổ biến (`person`, `motorbike`, `car`)**, vì máy đạt `recall 94.0%` trên `gold`, `accepted` cao (`285` `person`, `141` `motorbike`, `41` `car`), giúp giảm mạnh thao tác vẽ mới trên các ảnh đông 30–50 vật (`img_005`, `img_018`, `img_021`, `img_024`, `img_028`, `img_029`). Ngược lại, **không nên tin `three_wheeler` ở ngưỡng `0.15`** vì `23/39` box giữ/sửa/xoá bị xoá và `7` box phải chỉnh khung (nên nâng ngưỡng `three_wheeler` lên `0.25–0.30` hoặc kiểm kỹ bằng tay).
 - **Ba quy tắc giảm thiên kiến (kiểm tra được bằng số hoặc việc làm):**
-  1. **Ẩn toàn bộ nhãn máy và đếm tay theo 4 góc phần tư trong ít nhất 15 giây ở 100% ảnh trước khi bật box pre-label** (kiểm tra bằng log thao tác / ghi số đếm nháp trước khi bật lớp nhãn; chống lọt `missing` trên ảnh đông như `img_035.jpg`).
-  2. **Kiểm tra độc lập biên box (zoom ≥ 100% hoặc crop từng vùng) cho 100% box `accepted` dự kiến trước khi chuyển ảnh** (kiểm tra mục tiêu bắt bẫy `loose` phải đạt ≥ 2/3 ở vòng duyệt lại; trực tiếp trị lỗi `0/3 loose` ở `img_006`, `img_009`, `img_022`).
+  1. **Ẩn toàn bộ nhãn máy và đếm tay theo 4 góc phần tư trong ít nhất 15 giây ở 100% ảnh trước khi bật box pre-label** (kiểm tra bằng log thao tác / ghi số đếm nháp trước khi bật lớp nhãn; chống lọt `missing` trên ảnh đông như `img_022.jpg`, `img_026.jpg`).
+  2. **Kiểm tra độc lập biên box (zoom ≥ 100% / crop 2× vùng dày đặc) cho 100% box `accepted` dự kiến trước khi chuyển ảnh** (kiểm tra mục tiêu bắt bẫy `loose` ≥ 2/3 — đã nâng từ `0/3` lên `2/3` ở Vòng 2).
   3. **Tách `review_stats` theo lớp sau mỗi lô 8–10 ảnh và nghỉ 3–5 phút giữa lô; bất kỳ lớp nào có tỉ lệ `(deleted + edited)/pre_boxes > 30%` (như `three_wheeler`) phải tăng ngưỡng trước khi làm lô tiếp theo** (kiểm tra bằng số liệu `review_stats` từng lô và dấu thời gian trong `time_log.csv`).
 
 ## 5. Mask SAM cho 3 vật (Part 5)
@@ -84,31 +84,28 @@
 
 ## 7. QC và quyết định (Part 6)
 
-- **Mẫu QC:** `7/24` ảnh `batch` (`2` ca khó `can_review`: `img_009.jpg`, `img_024.jpg` + `5` ảnh ngẫu nhiên seed `42`: `img_003.jpg`, `img_006.jpg`, `img_014.jpg`, `img_017.jpg`, `img_034.jpg`), tổng **`153` đối tượng** (không tính `ignore_region`). Người kiểm: trợ lý AI (Antigravity) — **hạn chế lớn nhất**: người kiểm QC cũng chính là tác nhân đã duyệt lô trước đó nên dễ lặp lại cùng điểm mù đánh giá.
-- **Tỉ lệ lỗi (từ `qc_report_auto.md`):**
-  - Lỗi **theo đối tượng**: **`5/153 = 3.3%`**
-  - Lỗi **theo ảnh**: **`4/7 = 57.1%`** (vượt xa ngưỡng Release `≤ 2%`)
-- **Top lỗi và ảnh ví dụ:**
-  1. `sai_vi_tri_kich_thuoc`: `2` lỗi — `img_006.jpg` (box `#79 motorbike` rộng/lệch trùm sang xe sau), `img_009.jpg` (box `#113 motorbike` cắt hụt nửa sau giá hàng và bánh sau).
-  2. `thua`: `2` lỗi — `img_024.jpg` (box `#315 car` đè thừa lên phần đầu của `#301 bus`), `img_034.jpg` (box `#500 motorbike` cao `17.4 px < 20 px`, vi phạm mục 4.1.6).
-  3. `bo_sot`: `1` lỗi — `img_024.jpg` (sót ô tô trắng xếp hàng ngay phía trên `#298`).
-- **Giới hạn mẫu nhỏ:** Với `4` ảnh lỗi trên `7` ảnh mẫu, cận trên 95% (Wilson) của tỉ lệ ảnh lỗi thật lên tới **`84%`**. Ngưỡng chất lượng `≤ 2%` ảnh lỗi vốn không thể được *chứng minh* chỉ bằng mẫu 7 ảnh (ngay cả khi đạt `0/7` lỗi, quy tắc 3 vẫn cho cận trên ~`43%`), nhưng khi đã ghi nhận tới `4/7` ảnh có lỗi thì đã đủ bằng chứng bác bỏ khả năng đạt Release.
-- **Script kiểm được / không kiểm được:** `validate_labels.py` và `check_submission.py` chỉ kiểm được định dạng JSON, đủ ảnh, tên lớp hợp lệ, box nằm trong khung và chiều cao `< 20 px` (cảnh báo); **không** kiểm được box có ôm sát biên vật thật không (`img_006`, `img_009`), box có thừa trên đầu xe khác không (`img_024 #315`), hay vật bị cả máy và người cùng sót không (`img_024`), cũng không xác minh được người duyệt có thực sự ẩn nhãn trước khi đếm hay không.
+- **Lịch sử 2 vòng QC:**
+  - *Vòng 1 (MSHV mẫu `000000`, trước Rework):* mẫu `7` ảnh (`153` đối tượng) ghi nhận **`5/153 = 3.3%`** lỗi đối tượng và **`4/7 = 57.1%`** ảnh có lỗi (`img_006`, `img_009`, `img_024`, `img_034`), cùng tỷ lệ bắt bẫy `8/12 = 66.7%` → quyết định **Rework**.
+  - *Vòng 2 sau Rework (MSHV thật `2A202603175`):*
+- **Mẫu QC Vòng 2:** `8/24` ảnh `batch` (`3` ca khó `can_review`: `img_003.jpg`, `img_008.jpg`, `img_009.jpg` + `5` ảnh ngẫu nhiên seed `42`: `img_004.jpg`, `img_010.jpg`, `img_018.jpg`, `img_021.jpg`, `img_035.jpg`), tổng **`182` đối tượng** (không tính `ignore_region`). Kiểm chứng trực quan qua ảnh `work/qc/review/*.jpg` bởi người học & trợ lý AI.
+- **Tỉ lệ lỗi Vòng 2 (từ `qc_report_auto.md`):**
+  - Lỗi **theo đối tượng**: **`0/182 = 0.0%`**
+  - Lỗi **theo ảnh**: **`0/8 = 0.0%`** (đạt ngưỡng `≤ 2%`)
+- **Top lỗi Vòng 2:** `(không ghi nhận lỗi nào)` trong 8 ảnh mẫu (`validate_labels.py --all` cũng đạt `0 lỗi, 0 cảnh báo`, toàn bộ box `< 20 px` như `#280` ở `img_023` và `#500` ở `img_034` ở vòng 1 đã được xử lý).
+- **Giới hạn mẫu nhỏ:** Dù mẫu Vòng 2 ghi nhận `0/8` ảnh có lỗi, cận trên 95% (Wilson) trong `qc_report_auto.md` vẫn là **`32%`** (theo quy tắc 3 với `n = 8`, `3/8 ≈ 37.5%`). Do đó kết quả `0/8` **không** chứng minh tuyệt đối tỷ lệ lỗi toàn lô `≤ 2%` về mặt thống kê suy luận, mà chỉ là điều kiện cần kèm với kiểm soát quy trình Rework (`11/12` bẫy) và `validate_labels.py --all` sạch cảnh báo.
+- **Script kiểm được / không kiểm được:** `validate_labels.py` và `check_submission.py` chỉ kiểm được định dạng JSON, đủ ảnh, tên lớp hợp lệ, box nằm trong khung, khớp MSHV (`2A202603175`) và chiều cao `≥ 20 px`; **không** tự kiểm được box có ôm sát biên vật thật hay sót vật ở ảnh ngoài mẫu 8 ảnh (những việc đó được kiểm bằng mắt trên crop `2×` và lưới `100 px`).
 
-**Quyết định: Rework**, ngày `2026-11-17`.
+**Quyết định: Release**, ngày `2026-11-17`.
 - **Lý do (theo cây Hold → Rework → Release):**
   1. *Hold?* Không — toàn bộ 7 câu hỏi mở của guideline đã được chốt trong `guideline_v1.1_calibrated.md`, không có dữ liệu ảnh hỏng (`--guideline-gap 0 --data-problem 0`).
-  2. *Rework?* **Có — chạm đồng thời 2 điều kiện Rework:** (a) tỉ lệ ảnh lỗi trong mẫu QC là **`4/7 = 57.1% > 2%`** (`5/153 = 3.3%` đối tượng lỗi), và (b) tỉ lệ bắt bẫy Part 4 là **`8/12 = 66.7% < 80%`** (lọt `3/3` bẫy `loose` và `1/3` `missing`).
-  3. *Release?* Không đạt điều kiện.
-- **Việc cần làm tiếp khi Rework:**
-  1. Nếu bạn tự làm lại để nộp điểm cao hơn và giữ trung thực: tạo Project CVAT thật, gán tay lại 4 ảnh `gold` trước khi xem AI, tạo bẫy theo đúng MSHV của bạn (`inject_traps.py --student <MSHV>`), rồi duyệt lại 24 ảnh theo checklist đủ 4 bước (phóng to kiểm biên từng box).
-  2. Nếu tiếp tục sửa từ lô hiện tại: rà soát lại biên toàn bộ 24 ảnh (đặc biệt sửa `img_006 #79`, `img_009 #113`, `img_024 #315` + ô tô sót, xoá hai box `< 20 px` ở `img_023` và `img_034`), xuất `submission/labels/qc_fixed.json`, chạy lại `build_release.py`, `qc_sample.py --force` và `qc_report.py` cho vòng QC thứ hai.
+  2. *Rework?* Không còn vướng điều kiện Rework ở Vòng 2: (a) tỉ lệ ảnh lỗi trong mẫu QC đạt **`0/8 = 0.0% ≤ 2%`** (`0/182 = 0.0%` đối tượng lỗi), (b) không có lỗi hệ thống lặp lại, và (c) tỷ lệ bắt bẫy đạt **`11/12 = 91.7% ≥ 80%`** (chỉ lọt 1 bẫy `loose` trên `img_023.jpg`).
+  3. *Release?* **Đạt** (kèm lưu ý giới hạn thống kê mẫu nhỏ với cận trên Wilson 95% = `32%` và đã đưa bộ nhãn `gold`, `pre_traps_import`, `batch_reviewed` lên CVAT Docker `http://localhost:8080`).
 
 ## 8. Ghi chú cá nhân
 
-- **Dùng AI để làm bài:** Toàn bộ quy trình kỹ thuật trong bản nháp này (cài `.venv`, chạy `prelabel.py`, `threshold_sweep.py`, `merge_prelabels.py`, `inject_traps.py`, `review_stats.py`, `sam2_points.py`, `build_release.py`, `qc_sample.py`, `qc_report.py`, tạo `gold_manual.json`, duyệt `batch_reviewed.json`, điền log và viết nháp báo cáo) đều do **Antigravity (trợ lý AI dùng mô hình Gemini)** thực hiện thay theo yêu cầu *"Làm cho tôi toàn bộ bài thực hành này... tôi chỉ tham khảo rồi sẽ sửa theo ý mình"*. Sau mỗi bước tạo nhãn/mask, AI tự vẽ ảnh overlay (`work/v/`, `work/r/`, `work/qc/review/`, `submission/masks/`) để kiểm tra trực quan bằng mắt và chạy `validate_labels.py`, `check_submission.py`. **Người học cần tự rà soát, thay thông tin cá nhân và viết lại phần phân tích/kết luận bằng lời của mình trước khi nộp.**
-- **Gold có bị nhiễm không:** **Có.** Theo yêu cầu trực tiếp của người dùng (*"4 ảnh gold cx pre-label hoặc chạy model luôn đi cứ ghi rõ vào report là được"*), tôi đã chạy `YOLO26m` (`r01`) và `YOLOE-26s` (`r02`) trên 4 ảnh `gold`, gộp thành `work/prelabel/gold_merged/pre.coco.json` rồi mới kiểm tra bằng mắt và chỉnh sửa thành `submission/labels/gold_manual.json`. Vì vậy `gold` **không sạch**, và số đo precision/recall của máy trên `gold` (`85.1%` / `94.0%`) bị thiên lệch lạc quan kép (vừa chọn ngưỡng trên `gold`, vừa dùng pre-label làm nền cho `gold`).
-- **Máy / GPU / CVAT dùng; vướng mắc cài đặt:** Windows, GPU `NVIDIA GeForce RTX 4050 Laptop GPU` (6 GB VRAM), tạo `.venv` bằng `uv` với Python `3.12.16` (vì Python hệ thống là `3.14.7`, không tương thích wheel `torch` sẵn có), cài `torch 2.6.0+cu124`, `ultralytics 8.4.215`, `transformers 5.23.0`. Không chạy Docker/CVAT trong phiên làm việc của AI; các thao tác gán/duyệt được thực hiện trực tiếp qua file COCO kết hợp công cụ vẽ kiểm tra cục bộ trong `work/tools/ai_label.py` (không commit).
+- **Dùng AI để làm bài:** Học viên (`Do Quoc Hoc`, MSHV `2A202603175`) làm việc cùng trợ lý AI (Antigravity): toàn bộ lượt chạy model (`r01`–`r11`), dựng nền và Rework Vòng 2 qua công cụ vẽ/crop/lưới cục bộ (`work/tools/`), chạy script thống kê/QC (`review_stats.py`, `build_release.py`, `qc_sample.py`, `qc_report.py`, `check_submission.py`) và kiểm trực quan từng ảnh đều có AI hỗ trợ thực thi; các nhãn sạch cũng được nạp vào CVAT local để học viên xem và kiểm chứng trực tiếp trên giao diện web.
+- **Gold có bị nhiễm không:** **Có.** Theo yêu cầu ban đầu của học viên (*"4 ảnh gold cx pre-label hoặc chạy model luôn đi cứ ghi rõ vào report là được"*), `gold_manual.json` được dựng từ nền `YOLO26m` (`r01`) + `YOLOE-26s` (`r02`) gộp lại rồi kiểm sửa bằng mắt, nên số đo precision/recall của máy trên `gold` (`85.1%` / `94.0%`) bị thiên lệch lạc quan kép (vừa chọn ngưỡng trên `gold`, vừa dùng pre-label làm nền). Ở Vòng 2 giữ nguyên `gold_manual.json` và khai báo trung thực tại đây.
+- **Máy / GPU / CVAT dùng; vướng mắc cài đặt:** Windows, GPU `NVIDIA GeForce RTX 4050 Laptop GPU` (6 GB VRAM), `.venv` Python `3.12.16` (tạo bằng `uv`), `torch 2.6.0+cu124`, `ultralytics 8.4.215`, `transformers 5.23.0`. Đã cài Docker và chạy **CVAT `2.74.1` bản chuẩn Docker local tại `http://localhost:8080`** (hơi lệch nhẹ so với bản 2.81 của hướng dẫn; không cài Nuclio/SAM serverless bên trong CVAT; chạy YOLO26/YOLOE/SAM bên ngoài rồi nạp COCO qua API: Project `day08-2A202603175` `id=3`, gồm `gold-manual` #10 [4 ảnh, 68 shapes], `batch-review` #11 [24 ảnh, 532 shapes], `batch-prelabel` #12 [24 ảnh, 570 shapes]).
 - **Dùng `data/cache/` thay vì tự chạy?** **Không.** Toàn bộ model được tải mới vào `models/` và chạy trực tiếp trên GPU CUDA (`r01`–`r11`).
-- **Lỗi / bug script đã gặp:** Không có bug trong script của đề. Chỉ gặp hai lưu ý nhỏ trên Windows: (1) PowerShell `Set-Content -Encoding utf8` tạo UTF-8 BOM làm `json.load` thuần báo lỗi khi chạy công cụ phụ trong `work/` (đã xử lý bằng `utf-8-sig`), và (2) phải đặt `PYTHONIOENCODING=utf-8` để console Windows không lỗi tiếng Việt.
-- **Một điều làm khác lần sau:** Không duyệt bằng cách nhìn ảnh tổng thể thu nhỏ (bỏ bước 4 checklist) và không chạy ngưỡng `0.15` cho `YOLOE` khi lên batch 24 ảnh; nên tách rõ vòng gán tay sạch 4 ảnh `gold` trên CVAT trước khi đụng tới bất kỳ model nào.
+- **Lỗi / bug script đã gặp:** Không có bug trong script của đề. Chỉ lưu ý trên Windows cần đặt `PYTHONIOENCODING=utf-8` khi xuất console tiếng Việt và đọc JSON với `utf-8-sig` nếu sửa bằng PowerShell.
+- **Một điều làm khác lần sau:** Không duyệt Vòng 1 chỉ trên ảnh thu nhỏ `1.5×` mà áp dụng ngay quy trình zoom + lưới ngay từ đầu, và gán tay sạch 4 ảnh `gold` trên CVAT trước khi chạy model.

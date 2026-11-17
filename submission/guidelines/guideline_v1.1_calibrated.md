@@ -1,4 +1,4 @@
-# Label contract — Phố châu Á — BỔ SUNG v1.1 — 000000 - Nguyen Van A (Thay MSHV va Ten cua ban)
+# Label contract — Phố châu Á — BỔ SUNG v1.1 — 2A202603175 - Do Quoc Hoc
 
 > **Chỉ viết phần thay đổi so với v1.0** (không copy cả file). Các quyết định dưới đây khớp với `submission/qc/calibration_decisions.csv`.
 

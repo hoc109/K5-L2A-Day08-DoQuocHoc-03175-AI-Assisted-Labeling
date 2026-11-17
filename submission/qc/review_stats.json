@@ -1,51 +1,53 @@
 {
  "mode": "det",
  "images": 24,
- "pre_boxes": 557,
- "final_objects": 516,
- "accepted": 491,
- "edited": 9,
+ "pre_boxes": 556,
+ "final_objects": 518,
+ "accepted": 486,
+ "edited": 15,
  "deleted": 55,
- "added": 16,
- "class_changed_info": 6,
- "accepted_rate": 0.881508078994614,
- "edited_rate": 0.01615798922800718,
- "deleted_rate": 0.09874326750448834,
- "added_rate": 0.031007751937984496,
+ "added": 17,
+ "class_changed_info": 8,
+ "accepted_rate": 0.8741007194244604,
+ "edited_rate": 0.02697841726618705,
+ "deleted_rate": 0.09892086330935251,
+ "added_rate": 0.032818532818532815,
  "per_class": {
   "person": {
-   "accepted": 280,
-   "added": 3,
-   "deleted": 10
+   "accepted": 285,
+   "added": 4,
+   "edited": 2,
+   "deleted": 8
   },
   "motorbike": {
-   "accepted": 145,
-   "added": 2,
-   "deleted": 6
+   "accepted": 141,
+   "added": 4,
+   "deleted": 9,
+   "edited": 3
   },
   "bicycle": {
-   "accepted": 5,
-   "added": 2,
-   "deleted": 3
+   "accepted": 6,
+   "deleted": 1,
+   "added": 1
   },
   "three_wheeler": {
-   "edited": 9,
-   "deleted": 26,
-   "accepted": 7,
-   "added": 4
+   "accepted": 9,
+   "deleted": 23,
+   "added": 3,
+   "edited": 7
   },
   "car": {
-   "accepted": 49,
-   "deleted": 6,
+   "accepted": 41,
+   "deleted": 9,
+   "edited": 3,
    "added": 1
   },
   "truck": {
-   "accepted": 2,
-   "deleted": 4,
-   "added": 1
+   "accepted": 1,
+   "deleted": 5
   },
   "bus": {
-   "added": 3,
+   "added": 4,
    "accepted": 3
   }
  },
@@ -65,41 +67,29 @@
  },
  "traps": {
   "n": 12,
-  "caught": 8,
-  "rate": 0.6666666666666666,
+  "caught": 11,
+  "rate": 0.9166666666666666,
   "by_type": {
+   "extra": [
+    3,
+    3
+   ],
+   "missing": [
+    3,
+    3
+   ],
    "wrong_class": [
     3,
     3
    ],
    "loose": [
-    0,
-    3
-   ],
-   "missing": [
     2,
-    3
-   ],
-   "extra": [
-    3,
     3
    ]
   },
   "missed": [
    [
-    "img_022.jpg",
-    "loose"
-   ],
-   [
-    "img_009.jpg",
-    "loose"
-   ],
-   [
-    "img_035.jpg",
-    "missing"
-   ],
-   [
-    "img_006.jpg",
+    "img_023.jpg",
     "loose"
    ]
   ]
