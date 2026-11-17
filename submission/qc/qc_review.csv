@@ -1,0 +1,9 @@
+image,object_id,error_type,reviewer,note
+img_003.jpg,,khong,Antigravity (AI),"21 doi tuong, box om sat, phan lop dung"
+img_006.jpg,79,sai_vi_tri_kich_thuoc,Antigravity (AI),"box xe may rong/lech sang phai chom qua xe ke ben (bay loose lot)"
+img_009.jpg,113,sai_vi_tri_kich_thuoc,Antigravity (AI),"box xe tho phat thu cat mat nua sau gia hang va banh sau (bay loose lot)"
+img_014.jpg,,khong,Antigravity (AI),"20 doi tuong dat chuan"
+img_017.jpg,,khong,Antigravity (AI),"3 tuk-tuk va 3 nguoi dung vi tri, lop"
+img_024.jpg,315,thua,Antigravity (AI),"box car thua de len phan dau cua minibus #301"
+img_024.jpg,,bo_sot,Antigravity (AI),"sot o to trang xep hang phia tren #298 (goc tren trai)"
+img_034.jpg,500,thua,Antigravity (AI),"box xe may qua nho (cao 17.4 px < 20 px theo muc 4.1.6)"
